@@ -1,6 +1,7 @@
 package io.corps.sgoc.schema;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Iterators;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.GeneratedMessage;
 import com.google.protobuf.Message;
@@ -17,8 +18,19 @@ import java.util.Map;
 public class FieldPath<T extends GeneratedMessage> implements Iterable<Descriptors.FieldDescriptor> {
   private final List<Descriptors.FieldDescriptor> fieldDescriptors;
 
-  public FieldPath(List<Descriptors.FieldDescriptor> fieldDescriptors) {
+  FieldPath(List<Descriptors.FieldDescriptor> fieldDescriptors) {
     this.fieldDescriptors = Preconditions.checkNotNull(fieldDescriptors);
+    for (Descriptors.FieldDescriptor fieldDescriptor : this.fieldDescriptors.subList(0, this.fieldDescriptors.size() - 1)) {
+      Preconditions.checkArgument(!fieldDescriptor.isRepeated(), "Unfortunately, field paths that include " +
+          "repeated descriptors other than at the end are not supported.");
+    }
+  }
+
+  public Descriptors.Descriptor getRootDescriptor() {
+    if(fieldDescriptors.isEmpty()) {
+      return null;
+    }
+    return fieldDescriptors.get(0).getContainingType();
   }
 
   public static <T extends GeneratedMessage> FieldPath<T> fieldPathOf(T pathOrigin) {
@@ -88,6 +100,42 @@ public class FieldPath<T extends GeneratedMessage> implements Iterable<Descripto
     if (iterator.hasNext()) {
       Descriptors.FieldDescriptor next = iterator.next();
       keyObject.setField(next, buildDefaultFor(keyObject, next, iterator));
+    }
+  }
+
+  public Descriptors.FieldDescriptor getTerminatingDescriptor() {
+    return Iterators.getLast(iterator());
+  }
+
+  public Descriptors.FieldDescriptor.Type getTerminatingType() {
+    Descriptors.FieldDescriptor last = Iterators.getLast(iterator());
+    if (last == null) {
+      return Descriptors.FieldDescriptor.Type.MESSAGE;
+    }
+    return last.getType();
+  }
+
+  public void clear(T.Builder object) {
+    setOrClear(object, iterator(), null);
+  }
+
+  public void setOrClear(T.Builder object, Object value) {
+    setOrClear(object, iterator(), value);
+  }
+
+  private void setOrClear(Message.Builder builder, Iterator<Descriptors.FieldDescriptor> iterator, Object value) {
+    Descriptors.FieldDescriptor next = iterator.next();
+    if (!next.getType().equals(Descriptors.FieldDescriptor.Type.MESSAGE)) {
+      Preconditions.checkState(!iterator.hasNext());
+      if (value == null)
+        builder.clearField(next);
+      else
+        builder.setField(next, value);
+    } else {
+      Preconditions.checkState(iterator.hasNext());
+      Message.Builder nextField = ((Message) builder.getField(next)).toBuilder();
+      setOrClear(nextField, iterator, value);
+      builder.setField(next, nextField.build());
     }
   }
 

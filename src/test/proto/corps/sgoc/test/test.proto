@@ -9,6 +9,7 @@ extend ObjectWrapper {
     optional Pie pie = 102;
     optional Apple apple = 103;
     optional Orange orange = 104;
+    optional Spaghetti spaghetti = 105;
 }
 
 message Basket {
@@ -58,9 +59,21 @@ message Orange {
     }
 
     optional Skin skin = 1;
+    optional string basket_id = 3 [(corps.sgoc.reference) = {
+        type: {[corps.sgoc.test.basket]: {}}
+    }];
+
     option (corps.sgoc.entity) = {
         index: {
             key_field: {[corps.sgoc.test.orange]: {skin: {texture: ""}}}
         }
     };
+}
+
+message Spaghetti {
+    message Noodle {
+        optional string type = 1 [(corps.sgoc.required) = true, (corps.sgoc.max_length) = 8];
+    }
+    repeated Noodle noodle = 1 [(corps.sgoc.max_length) = 2];
+    repeated string descriptive_words = 2 [(corps.sgoc.required) = true];
 }

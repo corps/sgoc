@@ -83,7 +83,7 @@ public class MysqlBackend implements Backend, Closeable {
         query.addConditions(Tables.OBJECTS.UUID.in(Lists.transform(objectIds, UUID_OF_OBJECT_ID_F)));
       }
 
-      Sync.ObjectId.Builder idBuilder = Sync.ObjectId.newBuilder().setRootId(rootKey);
+      Sync.ObjectId.Builder idBuilder = Sync.ObjectId.newBuilder();
       for (ObjectsRecord record : query.fetchLazy()) {
         idBuilder.setUuid(Preconditions.checkNotNull(record.getUuid()));
         byte[] objectBytes = Preconditions.checkNotNull(record.getObject());

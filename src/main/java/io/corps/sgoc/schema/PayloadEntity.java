@@ -2,13 +2,13 @@ package io.corps.sgoc.schema;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import com.google.protobuf.DescriptorProtos;
 import com.google.protobuf.Descriptors;
+import com.google.protobuf.GeneratedMessage;
 import com.google.protobuf.TextFormat;
 import io.corps.sgoc.sync.Sync;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by corps@github.com on 2014/02/22.
@@ -18,6 +18,9 @@ public class PayloadEntity {
   final Descriptors.FieldDescriptor wrapperFieldDescriptor;
   private final Map<Schema.IndexDescriptor, EntityIndex> indexes;
   private final Map<String, EntityIndex> indexByName;
+
+  private final Map<GeneratedMessage.GeneratedExtension<DescriptorProtos.FieldOptions, ?>,
+      List<FieldPathChain<Sync.ObjectWrapper>>> fieldOptionPathChains;
 
   PayloadEntity(Descriptors.FieldDescriptor wrapperFieldDescriptor) {
     Preconditions.checkArgument(wrapperFieldDescriptor.isExtension() &&
@@ -29,6 +32,7 @@ public class PayloadEntity {
     this.wrapperFieldDescriptor = wrapperFieldDescriptor;
     this.indexes = new HashMap<>();
     this.indexByName = new HashMap<>();
+    this.fieldOptionPathChains = new HashMap<>();
 
     analyze();
   }
@@ -56,6 +60,53 @@ public class PayloadEntity {
 
   public Collection<EntityIndex> getIndexes() {
     return indexes.values();
+  }
+
+  public Collection<FieldPathChain<Sync.ObjectWrapper>> getFieldPathChainsFor(
+      GeneratedMessage.GeneratedExtension<DescriptorProtos.FieldOptions, ?> option) {
+    if (!fieldOptionPathChains.containsKey(option)) {
+      List<FieldPathChain<Sync.ObjectWrapper>> fieldPathChains = Lists.newArrayList();
+      findFieldPaths(option, Lists.newArrayList(wrapperFieldDescriptor), wrapperFieldDescriptor.getMessageType(), null,
+          Lists.<FieldPath>newArrayList(), fieldPathChains);
+      fieldOptionPathChains.put(option, fieldPathChains);
+    }
+
+    return fieldOptionPathChains.get(option);
+  }
+
+  private void findFieldPaths(GeneratedMessage.GeneratedExtension<DescriptorProtos.FieldOptions, ?> option,
+                              ArrayList<Descriptors.FieldDescriptor> fieldDescriptors,
+                              Descriptors.Descriptor messageType, FieldPath<Sync.ObjectWrapper> rootPath,
+                              List<FieldPath> fieldPaths, List<FieldPathChain<Sync.ObjectWrapper>> fieldPathChains) {
+    for (Descriptors.FieldDescriptor fieldDescriptor : messageType.getFields()) {
+      ArrayList<Descriptors.FieldDescriptor> nextFieldDescriptorList =
+          Lists.<Descriptors.FieldDescriptor>newArrayList(fieldDescriptors);
+      nextFieldDescriptorList.add(fieldDescriptor);
+
+      boolean hasExtension = fieldDescriptor.getOptions().hasExtension(option);
+      boolean isRepeated = fieldDescriptor.isRepeated();
+      boolean isMessage = fieldDescriptor.getType().equals(Descriptors.FieldDescriptor.Type.MESSAGE);
+
+      if (hasExtension || isRepeated) {
+        FieldPath<Sync.ObjectWrapper> nextRootPath = rootPath;
+        List<FieldPath> nextFieldPaths = Lists.newArrayList(fieldPaths);
+        if (rootPath == null) {
+          nextRootPath = new FieldPath<>(nextFieldDescriptorList);
+        } else {
+          nextFieldPaths.add(new FieldPath(nextFieldDescriptorList));
+        }
+        if (hasExtension) {
+          fieldPathChains.add(new FieldPathChain<>(nextRootPath, nextFieldPaths));
+        }
+        if (isRepeated && isMessage) {
+          findFieldPaths(option, Lists.<Descriptors.FieldDescriptor>newArrayList(), fieldDescriptor.getMessageType(),
+              nextRootPath, nextFieldPaths, fieldPathChains);
+        }
+      } else if (isMessage) {
+        findFieldPaths(option, nextFieldDescriptorList, fieldDescriptor.getMessageType(), rootPath, fieldPaths,
+            fieldPathChains);
+      }
+    }
   }
 
   private void analyze() {

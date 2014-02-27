@@ -36,7 +36,17 @@ Task tarProtosUpTask = task(tarProtosUp, type: Tar) {
     include("**/*.proto")
 }
 
+Task cleanupTestProtosTask = task(cleanupTestProtos, type: Delete) {
+    delete "${project.buildDir}/generated-sources/test/io/corps/sgoc/schema",
+            "${project.buildDir}/generated-sources/test/io/corps/sgoc/sync",
+            "${project.buildDir}/generated-sources/test/com"
+}
+
+
 Task generateTestProtoTask = project.tasks.getByName("generateTestProto")
 Task extractTestProtoTask = project.tasks.getByName("extractTestProto")
+Task compileTestJavaTask = project.tasks.getByName("compileTestJava")
 generateTestProtoTask.dependsOn(tarProtosUpTask)
 extractTestProtoTask.dependsOn(tarProtosUp)
+compileTestJavaTask.dependsOn(cleanupTestProtos)
+cleanupTestProtosTask.mustRunAfter(generateTestProtoTask)

@@ -14,7 +14,7 @@ public class Fixtures {
     return wrapAnOrange(generateAWrapper().build(), generateAnOrange().build());
   }
 
-  private static Test.Orange.Builder generateAnOrange() {
+  public static Test.Orange.Builder generateAnOrange() {
     return Test.Orange.newBuilder().setSkin(Test.Orange.Skin.newBuilder().setTexture("Plumpy"));
   }
 
@@ -46,6 +46,22 @@ public class Fixtures {
     return objectWrapper.toBuilder().setExtension(Test.orange, orange).build();
   }
 
+  public static Sync.ObjectWrapper wrapABasket() {
+    return wrapABasket(generateAWrapper().build(), generateABasket().build());
+  }
+
+  public static Sync.ObjectWrapper wrapAPie(Test.Pie pie) {
+    return wrapAPie(generateAWrapper().build(), pie);
+  }
+
+  public static Sync.ObjectWrapper wrapAPie(Sync.ObjectWrapper objectWrapper, Test.Pie pie) {
+    return objectWrapper.toBuilder().setExtension(Test.pie, pie).build();
+  }
+
+  public static Sync.ObjectWrapper wrapABasket(Sync.ObjectWrapper objectWrapper, Test.Basket basket) {
+    return objectWrapper.toBuilder().setExtension(Test.basket, basket).build();
+  }
+
   public static Test.Apple buildAnApple(Test.Apple apple) {
     return generateAnApple().mergeFrom(apple).build();
   }
@@ -56,15 +72,38 @@ public class Fixtures {
 
   public static Sync.ObjectWrapper.Builder generateAWrapper() {
     return Sync.ObjectWrapper.newBuilder()
-        .setId(Sync.ObjectId.newBuilder().setUuid(generateUUID()).setRootId(generateUUID()));
+        .setId(Sync.ObjectId.newBuilder().setUuid(generateUUID()));
   }
 
   public static Test.Apple.Builder generateAnApple() {
     return Test.Apple.newBuilder().setOrdinal(1);
   }
 
+  public static Test.Pie.Builder generateAPie() {
+    return Test.Pie.newBuilder();
+  }
+
+  public static Test.Basket.Builder generateABasket() {
+    return Test.Basket.newBuilder().setName("A tisket a tasket");
+  }
+
   public static String generateUUID() {
     return UUID.randomUUID().toString();
   }
 
+  public static Sync.ObjectWrapper wrapABasket(Test.Basket.Builder basketBuilder) {
+    return wrapABasket(generateAWrapper().build(), basketBuilder.build());
+  }
+
+  public static Test.Spaghetti.Builder generateASpaghetti() {
+    return Test.Spaghetti.newBuilder();
+  }
+
+  public static Sync.ObjectWrapper wrapASpaghetti() {
+    return wrapASpaghetti(generateAWrapper().build(), generateASpaghetti().build());
+  }
+
+  public static Sync.ObjectWrapper wrapASpaghetti(Sync.ObjectWrapper wrapper, Test.Spaghetti spaghetti) {
+    return wrapper.toBuilder().setExtension(Test.spaghetti, spaghetti).build();
+  }
 }

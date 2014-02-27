@@ -5,6 +5,7 @@ import io.corps.sgoc.sync.Sync;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -14,7 +15,7 @@ import java.util.Set;
  */
 public interface ReadSession extends Closeable {
   // Fetches the given object ids into the session cache in an efficient manner.
-  void prefetchObjects(List<Sync.ObjectId> objectIds) throws IOException;
+  void prefetchObjects(Collection<Sync.ObjectId> objectIds) throws IOException;
 
   void prefetchIndexLookups(Iterable<IndexLookup> indexLookups) throws IOException;
 

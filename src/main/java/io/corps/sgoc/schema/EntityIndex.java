@@ -2,6 +2,7 @@ package io.corps.sgoc.schema;
 
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
@@ -33,6 +34,10 @@ public class EntityIndex {
       this.fieldPaths.add(FieldPath.fieldPathOf(objectWrapper));
     }
 
+    if (referenceDescriptor != null) {
+      validateReferenceDescriptor();
+    }
+
     this.indexDescriptor = indexDescriptor;
   }
 
@@ -60,14 +65,6 @@ public class EntityIndex {
   }
 
   @Override
-  public String toString() {
-    return "EntityIndex{" +
-        "indexDescriptor=" + indexDescriptor +
-        ", referenceDescriptor=" + referenceDescriptor +
-        '}';
-  }
-
-  @Override
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
@@ -81,6 +78,14 @@ public class EntityIndex {
     return true;
   }
 
+  @Override
+  public String toString() {
+    return "EntityIndex{" +
+        "indexDescriptor=" + indexDescriptor +
+        ", referenceDescriptor=" + referenceDescriptor +
+        '}';
+  }
+
   public boolean isReference() {
     return referenceDescriptor != null;
   }
@@ -91,6 +96,16 @@ public class EntityIndex {
 
   public IndexLookup lookup(Object[] objects) {
     return new IndexLookup(this, objects);
+  }
+
+  public FieldPath<Sync.ObjectWrapper> getReferenceFieldPath() {
+    Preconditions.checkState(isReference());
+    return fieldPaths.get(0);
+  }
+
+  public Schema.ReferenceDescriptor.OnDeleteBehavior getCascadeDeletionBehavior() {
+    Preconditions.checkState(isReference());
+    return referenceDescriptor.getOnDelete();
   }
 
   public List<Descriptors.FieldDescriptor> getReferencedWrapperFields() {
@@ -108,6 +123,14 @@ public class EntityIndex {
             return wrapperField;
           }
         });
+  }
+
+  private void validateReferenceDescriptor() {
+    Preconditions.checkArgument(fieldPaths.size() == 1);
+    FieldPath<Sync.ObjectWrapper> referencePath = fieldPaths.get(0);
+    Descriptors.FieldDescriptor last = Iterators.getLast(referencePath.iterator(), null);
+    last = Preconditions.checkNotNull(last);
+    Preconditions.checkArgument(last.getJavaType().equals(Descriptors.FieldDescriptor.JavaType.STRING));
   }
 
   private Object[] getIndexValues(Sync.ObjectWrapper objectWrapper) {

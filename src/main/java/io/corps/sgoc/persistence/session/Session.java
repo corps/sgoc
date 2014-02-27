@@ -7,10 +7,12 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.SetMultimap;
 import com.google.common.collect.Sets;
-import com.google.protobuf.Descriptors;
-import com.google.protobuf.Message;
 import io.corps.sgoc.persistence.session.backend.Backend;
-import io.corps.sgoc.schema.*;
+import io.corps.sgoc.persistence.session.trigger.*;
+import io.corps.sgoc.schema.EntityIndex;
+import io.corps.sgoc.schema.EntitySchema;
+import io.corps.sgoc.schema.IndexLookup;
+import io.corps.sgoc.schema.PayloadEntity;
 import io.corps.sgoc.sync.Sync;
 import io.corps.sgoc.utils.MultimapUtils;
 
@@ -23,11 +25,14 @@ import java.util.*;
  */
 // In the future, would like to create separate implementations for ReadSession and WriteSession that needed
 // only subsets of the backend, etc.
-public class Session implements ReadSession, WriteSession {
+public class Session implements ReadWriteSession {
   public static final int FRESH_SYNC_VERSION_NUMBER = 0;
   private final String rootKey;
   private final Backend backend;
   private final EntitySchema entitySchema;
+  private final Set<BeforePutTrigger> beforePutTriggers;
+  private final Set<AfterPutTrigger> afterPutTriggers;
+  private final Set<TransactionTrigger> transactionTriggers;
   private final Set<IndexLookup> loadedIndexLookups = new HashSet<>();
   private final Set<Sync.ObjectId> loadedObjects = new HashSet<>();
   private final Map<Sync.ObjectId, Sync.ObjectWrapper> mutatedObjects = new HashMap<>();
@@ -39,15 +44,34 @@ public class Session implements ReadSession, WriteSession {
   private boolean closed = false;
   private boolean opened = false;
 
+  // TODO:  Configuration Builder?
   public Session(String rootKey, Backend backend, EntitySchema entitySchema) {
+    this(rootKey, backend, entitySchema, Collections.<BeforePutTrigger>emptySet(),
+        Collections.<AfterPutTrigger>emptySet(), Collections.<TransactionTrigger>emptySet());
+  }
+
+  public Session(String rootKey, Backend backend, EntitySchema entitySchema,
+                 Set<BeforePutTrigger> beforePutTriggers,
+                 Set<AfterPutTrigger> afterPutTriggers,
+                 Set<TransactionTrigger> transactionTriggers) {
+
+    this.beforePutTriggers = Sets.newTreeSet(BeforePutTrigger.BY_PRIORITY);
+    this.afterPutTriggers = Sets.newTreeSet(AfterPutTrigger.BY_PRIORITY);
+    this.transactionTriggers = Sets.newTreeSet(TransactionTrigger.BY_PRIORITY);
+
+    this.beforePutTriggers.addAll(beforePutTriggers);
+    this.afterPutTriggers.addAll(afterPutTriggers);
+    this.transactionTriggers.addAll(transactionTriggers);
+
     this.rootKey = rootKey;
     this.backend = backend;
     this.entitySchema = entitySchema;
     this.logStateManager = new LogStateManager(backend);
+    addDefaultTriggers();
   }
 
   @Override
-  public void prefetchObjects(List<Sync.ObjectId> objectIds) throws IOException {
+  public void prefetchObjects(Collection<Sync.ObjectId> objectIds) throws IOException {
     ensureOpen();
     ensureObjectIdsValid(objectIds);
 
@@ -144,12 +168,12 @@ public class Session implements ReadSession, WriteSession {
 
     PayloadEntity payloadEntity = entitySchema.getEntity(objectWrapper);
     Sync.ObjectWrapper existingObject = get(id);
-    objectWrapper = Preconditions.checkNotNull(preformBeforePutTriggers(objectWrapper, existingObject));
+    objectWrapper = performBeforePutTriggers(objectWrapper, existingObject);
 
     mutatedObjects.put(id, objectWrapper);
     updateIndexMutationState(payloadEntity.getIndexes(), objectWrapper, existingObject);
 
-    preformAfterPutTriggers(payloadEntity, existingObject, objectWrapper);
+    performAfterPutTriggers(payloadEntity, existingObject, objectWrapper);
   }
 
   @Override
@@ -167,21 +191,37 @@ public class Session implements ReadSession, WriteSession {
   public void save() throws IOException {
     ensureOpen();
 
+    boolean success = false;
+
     try {
       writeLogEntry();
       applyChanges();
       finalizeChanges();
+      success = true;
     } finally {
       close();
+      performAfterCommitTriggers(success);
     }
 
-    performAfterCommitTriggers();
   }
 
-  // TODO: implement
-  private void preformAfterPutTriggers(PayloadEntity entityDescriptor,
-                                       Sync.ObjectWrapper existingObject, Sync.ObjectWrapper objectWrapper) {
+  // TODO: Pull this shit out bro.
+  private void addDefaultTriggers() {
+    beforePutTriggers.add(new BadReferenceDeletePropagationTrigger());
+    beforePutTriggers.add(new ClearDeletedPayloadsTrigger());
+    beforePutTriggers.add(new IdempotentDeleteTrigger());
+    beforePutTriggers.add(new ObjectVersioningTrigger());
+    beforePutTriggers.add(new StripUnknownFieldsTrigger());
+    beforePutTriggers.add(new RequiredValidationTrigger());
+    afterPutTriggers.add(new OnDeletePropagationTrigger());
+  }
 
+  private void performAfterPutTriggers(PayloadEntity entityDescriptor,
+                                       Sync.ObjectWrapper existingObject, Sync.ObjectWrapper objectWrapper)
+      throws IOException {
+    for (AfterPutTrigger trigger : afterPutTriggers) {
+      trigger.afterPut(this, entitySchema, objectWrapper, existingObject);
+    }
   }
 
   private void updateIndexMutationState(Collection<EntityIndex> entityIndexes,
@@ -219,19 +259,10 @@ public class Session implements ReadSession, WriteSession {
     }
   }
 
-  // TODO: implement.
-  private Sync.ObjectWrapper preformBeforePutTriggers(Sync.ObjectWrapper objectWrapper,
-                                                      Sync.ObjectWrapper existingObject) {
-
-    // TODO: Make this a trigger.
-    // Reset the field to a default instance if the object wrapper is deleted.
-    if (objectWrapper.getDeleted()) {
-      Descriptors.FieldDescriptor field =
-          entitySchema.getPayloadDescriptorField(objectWrapper);
-      if (objectWrapper.hasField(field)) {
-        objectWrapper = objectWrapper.toBuilder()
-            .setField(field, ((Message) objectWrapper.getField(field)).getDefaultInstanceForType()).build();
-      }
+  private Sync.ObjectWrapper performBeforePutTriggers(Sync.ObjectWrapper objectWrapper,
+                                                      Sync.ObjectWrapper existingObject) throws IOException {
+    for (BeforePutTrigger trigger : beforePutTriggers) {
+      objectWrapper = Preconditions.checkNotNull(trigger.beforePut(this, entitySchema, objectWrapper, existingObject));
     }
 
     return objectWrapper;
@@ -251,8 +282,14 @@ public class Session implements ReadSession, WriteSession {
     backend.writeLogEntry(logStateManager.getLogState());
   }
 
-  // TODO: implement
-  private void performAfterCommitTriggers() {
+  private void performAfterCommitTriggers(boolean success) throws IOException {
+    for (TransactionTrigger trigger : transactionTriggers) {
+      if(success) {
+        trigger.afterCommit(this, entitySchema, mutatedObjects.values());
+      } else {
+        trigger.afterRollback(this, entitySchema, mutatedObjects.values());
+      }
+    }
   }
 
   private void ensureObjectWrapperIsValid(Sync.ObjectWrapper objectWrapper) {
@@ -260,9 +297,8 @@ public class Session implements ReadSession, WriteSession {
     Preconditions.checkArgument(entitySchema.getPayloadDescriptorField(objectWrapper) != null);
   }
 
-  private void ensureObjectIdsValid(List<Sync.ObjectId> objectIds) {
+  private void ensureObjectIdsValid(Collection<Sync.ObjectId> objectIds) {
     for (Sync.ObjectId objectId : objectIds) {
-      Preconditions.checkState(objectId.getRootId().equals(rootKey));
       Preconditions.checkState(!objectId.getUuid().isEmpty());
     }
   }

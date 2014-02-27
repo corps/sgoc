@@ -113,37 +113,45 @@ public class SessionTest {
 
   @Test
   public void testPut() throws Exception {
-    ArrayList<Sync.ObjectWrapper> objects = Lists.newArrayList(objectWrapper);
+    ArrayList<Sync.ObjectWrapper> resultingObjects = Lists.newArrayList();
 
     when(backend.lookup(rootKey, Lists.newArrayList(id))).thenReturn(Lists.<Sync.ObjectWrapper>newArrayList());
     session.put(objectWrapper);
+    resultingObjects.add(objectWrapper.toBuilder().setVersion(1).build());
     reset(backend);
 
     // No lookups are made -- the get should fetch the put value.
-    Assert.assertEquals(objectWrapper, session.get(id));
+    Assert.assertEquals(objectWrapper.toBuilder().setVersion(1).build(), session.get(id));
     verifyNoMoreInteractions(backend);
     reset(backend);
 
 
-    objects.add(setupAnotherObject());
+    setupAnotherObject();
+    resultingObjects.add(objectWrapper.toBuilder().setVersion(1).build());
     when(backend.lookup(rootKey, Lists.newArrayList(id))).thenReturn(
-        Lists.<Sync.ObjectWrapper>newArrayList(objectWrapper.toBuilder().setDeleted(true).build()));
+        Lists.<Sync.ObjectWrapper>newArrayList(objectWrapper.toBuilder().setVersion(-1).build()));
+    when(backend.lookupIndexes(anyString(), anyList()))
+        .thenReturn(MultimapUtils.<IndexLookup, Sync.ObjectId>createMultimap());
     session.put(objectWrapper);
     reset(backend);
 
-    // No lookups are made -- the get should fetch the put value, and not the original dirty value.
-    Assert.assertEquals(objectWrapper, session.get(id));
+    // No lookups are made -- the get should fetch the put value, and not the original persisted value.
+    Assert.assertEquals(objectWrapper.toBuilder().setVersion(1).build(), session.get(id));
     verifyNoMoreInteractions(backend);
     reset(backend);
 
-    objects.add(setupAnotherObject());
-    session.put(objectWrapper.toBuilder().setDeleted(true).build());
+    when(backend.lookupIndexes(anyString(), anyList()))
+        .thenReturn(MultimapUtils.<IndexLookup, Sync.ObjectId>createMultimap());
+
+    setupAnotherObject();
+    resultingObjects.add(objectWrapper.toBuilder().setVersion(1).build());
+    session.put(objectWrapper.toBuilder().setVersion(-5).build());
 
     // Overrides previous put
     session.put(objectWrapper);
 
     session.save();
-    verify(backend).writeObjects(argThat(new EqualWithoutRegardToOrder<>(objects)));
+    verify(backend).writeObjects(argThat(new EqualWithoutRegardToOrder<>(resultingObjects)));
   }
 
   @Test
@@ -161,14 +169,6 @@ public class SessionTest {
     Assert.assertEquals(objectWrapper, session.get(id));
     verifyZeroInteractions(backend);
     reset(backend);
-
-    // Using a different rootKey fails
-    try {
-      session.get(id.toBuilder().setRootId("otherRootKey").build());
-      fail();
-    } catch (IllegalStateException e) {
-    }
-    verifyZeroInteractions(backend);
   }
 
   @Test
@@ -211,7 +211,7 @@ public class SessionTest {
   public void testPutObjectOverTombstoneIndexSaves() throws Exception {
     // The existing object is already deleted.
     when(backend.lookup(rootKey, Lists.newArrayList(id)))
-        .thenReturn(Lists.<Sync.ObjectWrapper>newArrayList(objectWrapper.toBuilder().setDeleted(true).build()));
+        .thenReturn(Lists.<Sync.ObjectWrapper>newArrayList(objectWrapper.toBuilder().setVersion(-1).build()));
     when(backend.lookupIndexes(eq(rootKey), anyList()))
         .thenReturn(MultimapUtils.<IndexLookup, Sync.ObjectId>createMultimap());
     session.put(objectWrapper);
@@ -306,7 +306,8 @@ public class SessionTest {
     Assert.assertEquals(Sets.newHashSet(id, objects.get(1).getId()), session.indexLookup(indexLookup));
 
     Sync.ObjectWrapper modifiedObjectWrapper =
-        Fixtures.wrapAnApple(objectWrapper, io.corps.sgoc.test.model.Test.Apple.newBuilder().setOrdinal(123).build());
+        Fixtures.wrapAnApple(objectWrapper.toBuilder().setVersion(1).build(),
+            io.corps.sgoc.test.model.Test.Apple.newBuilder().setOrdinal(123).build());
     session.put(modifiedObjectWrapper);
     Assert.assertEquals(Sets.newHashSet(objects.get(1).getId()), session.indexLookup(indexLookup));
     Assert.assertEquals(Sets.newHashSet(id),
@@ -337,7 +338,7 @@ public class SessionTest {
   private Sync.ObjectWrapper setupAnotherObject() {
     uuid = Fixtures.generateUUID();
     objectWrapper = Fixtures.wrapAnApple(
-        Sync.ObjectWrapper.newBuilder().setId(Sync.ObjectId.newBuilder().setRootId(rootKey).setUuid(uuid).build())
+        Sync.ObjectWrapper.newBuilder().setId(Sync.ObjectId.newBuilder().setUuid(uuid).build())
             .build());
     id = objectWrapper.getId();
     return objectWrapper;
