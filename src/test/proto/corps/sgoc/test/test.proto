@@ -1,0 +1,66 @@
+package corps.sgoc.test;
+option java_package = "io.corps.sgoc.test.model";
+
+import "corps/sgoc/sync.proto";
+import "corps/sgoc/schema.proto";
+
+extend ObjectWrapper {
+    optional Basket basket = 101;
+    optional Pie pie = 102;
+    optional Apple apple = 103;
+    optional Orange orange = 104;
+}
+
+message Basket {
+    optional string name = 1;
+}
+
+message Apple {
+    optional int64 ordinal = 1;
+    optional string basket_id = 2 [(corps.sgoc.reference) = {
+        type: {[corps.sgoc.test.basket]: {}},
+        index_name: "Basket Index",
+        on_delete:CASCADE
+    }];
+
+    option (corps.sgoc.entity) = {
+        index: {
+            unique: true,
+            key_field: {[corps.sgoc.test.apple]: {ordinal: 0}},
+            key_field: {[corps.sgoc.test.apple]: {basket_id: ""}}
+        },
+        index: {
+            key_field: {[corps.sgoc.test.apple]: {ordinal: 0}},
+            name: "Ordinals"
+        }
+    };
+}
+
+message Pie {
+    optional string fruit_id = 1 [(corps.sgoc.reference) = {
+        type: {[corps.sgoc.test.apple]: {}},
+        type: {[corps.sgoc.test.orange]: {}},
+        on_delete: SET_NULL,
+        index_name: "Fruit Index"
+    }];
+
+    option (corps.sgoc.entity) = {
+        index: {
+            name: "Fruit Index",
+            unique: true
+        }
+    };
+}
+
+message Orange {
+    message Skin {
+        optional string texture = 1;
+    }
+
+    optional Skin skin = 1;
+    option (corps.sgoc.entity) = {
+        index: {
+            key_field: {[corps.sgoc.test.orange]: {skin: {texture: ""}}}
+        }
+    };
+}

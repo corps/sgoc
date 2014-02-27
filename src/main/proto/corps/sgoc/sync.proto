@@ -1,0 +1,45 @@
+package corps.sgoc;
+
+option java_package = "io.corps.sgoc.sync";
+
+message ObjectId {
+    // The unique id for this object -- only truely unique per root_id.
+    optional string uuid = 1;
+    // The graph root id.  Usually the user id.
+    optional string root_id = 2;
+}
+
+message ObjectWrapper {
+    // Unique per user graph.
+    optional ObjectId id = 1;
+
+    // When true, the payload is omitted.
+    optional bool deleted = 2;
+
+    // Changes are optimisticly locked by each object's version.
+    optional int64 version = 3;
+
+    // Each payload type extends and uses one of these extensions.
+    extensions 100 to max;
+}
+
+message PutRequest {
+    // The graph root id.  Usually the user id.
+    optional string root_id = 1;
+    // Each object being put by this request.
+    repeated ObjectWrapper object = 2;
+}
+
+message PutResponse {
+    // Nothing.
+}
+
+message GetRequest {
+    // The last current_version the client has successfully applied to its state.
+    optional int64 applied_version = 1;
+}
+
+message GetResponse {
+    optional int64 current_version = 1;
+    repeated ObjectWrapper changed_object = 2;
+}

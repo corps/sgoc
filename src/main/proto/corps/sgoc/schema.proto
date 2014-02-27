@@ -1,0 +1,43 @@
+import "google/protobuf/descriptor.proto";
+import "corps/sgoc/sync.proto";
+
+package corps.sgoc;
+option java_package = "io.corps.sgoc.schema";
+
+message ReferenceDescriptor {
+    // The reference should be an ObjectWrapper with one extension set -- the referenced object type.
+    repeated ObjectWrapper type = 1;
+
+    enum OnDeleteBehavior {
+        CASCADE = 1; // Will delete the containing object when the reference is deleted.
+        SET_NULL = 2; // Will set this field null when the reference is deleted.
+    }
+    // Describes what this field should do when its reference is deleted.
+    optional OnDeleteBehavior on_delete = 2 [default = CASCADE];
+
+    optional string index_name = 3;  // When provided, uses the index of the same name's settings.
+}
+
+message IndexDescriptor {
+    // When true, constrains objects to only one per.
+    optional bool unique = 1 [default = false];
+
+    // Each key_field should be an object wrapper with nested values provided for fields.
+    // The last nested field is the field to be indexed.
+    repeated ObjectWrapper key_field = 2;
+
+    // A name given to the descriptor for easier usage.
+    optional string name = 3;
+}
+
+message EntityDescriptor {
+    repeated IndexDescriptor index = 1;
+}
+
+extend google.protobuf.MessageOptions {
+    optional EntityDescriptor entity = 12310; // Can only exist on String fields on the top level of a payload message.
+}
+
+extend google.protobuf.FieldOptions {
+    optional ReferenceDescriptor reference = 144801;
+}
