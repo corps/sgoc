@@ -11,7 +11,7 @@ package io.corps.sgoc.schema.tables.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class LogEntries extends org.jooq.impl.TableImpl<io.corps.sgoc.schema.tables.tables.records.LogEntriesRecord> {
 
-	private static final long serialVersionUID = 159553262;
+	private static final long serialVersionUID = 1814420074;
 
 	/**
 	 * The singleton instance of <code>sgoc_test.log_entries</code>
@@ -29,7 +29,7 @@ public class LogEntries extends org.jooq.impl.TableImpl<io.corps.sgoc.schema.tab
 	/**
 	 * The column <code>sgoc_test.log_entries.root_key</code>.
 	 */
-	public final org.jooq.TableField<io.corps.sgoc.schema.tables.tables.records.LogEntriesRecord, java.lang.String> ROOT_KEY = createField("root_key", org.jooq.impl.SQLDataType.VARCHAR.length(32).nullable(false), this);
+	public final org.jooq.TableField<io.corps.sgoc.schema.tables.tables.records.LogEntriesRecord, java.lang.String> ROOT_KEY = createField("root_key", org.jooq.impl.SQLDataType.VARCHAR.length(72).nullable(false), this);
 
 	/**
 	 * The column <code>sgoc_test.log_entries.sequence</code>.

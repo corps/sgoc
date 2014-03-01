@@ -45,6 +45,10 @@ public class EntityIndex {
     return indexDescriptor;
   }
 
+  public boolean isUnique() {
+    return indexDescriptor.getUnique();
+  }
+
   public String getName() {
     return indexDescriptor.getName();
   }

@@ -41,5 +41,6 @@ extend google.protobuf.MessageOptions {
 extend google.protobuf.FieldOptions {
     optional ReferenceDescriptor reference = 144801;
     optional bool required = 144802;
-    optional int32 max_length = 144803;
+    optional int32 max_length = 144803; // Applies to strings only
+    optional int32 max_repeated = 144804; // applies to any repeated.
 }

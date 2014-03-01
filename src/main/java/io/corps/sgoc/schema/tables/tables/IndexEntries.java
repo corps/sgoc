@@ -11,7 +11,7 @@ package io.corps.sgoc.schema.tables.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class IndexEntries extends org.jooq.impl.TableImpl<io.corps.sgoc.schema.tables.tables.records.IndexEntriesRecord> {
 
-	private static final long serialVersionUID = -991316857;
+	private static final long serialVersionUID = 169587583;
 
 	/**
 	 * The singleton instance of <code>sgoc_test.index_entries</code>
@@ -29,12 +29,12 @@ public class IndexEntries extends org.jooq.impl.TableImpl<io.corps.sgoc.schema.t
 	/**
 	 * The column <code>sgoc_test.index_entries.root_key</code>.
 	 */
-	public final org.jooq.TableField<io.corps.sgoc.schema.tables.tables.records.IndexEntriesRecord, java.lang.String> ROOT_KEY = createField("root_key", org.jooq.impl.SQLDataType.VARCHAR.length(32).nullable(false), this);
+	public final org.jooq.TableField<io.corps.sgoc.schema.tables.tables.records.IndexEntriesRecord, java.lang.String> ROOT_KEY = createField("root_key", org.jooq.impl.SQLDataType.VARCHAR.length(72).nullable(false), this);
 
 	/**
 	 * The column <code>sgoc_test.index_entries.uuid</code>.
 	 */
-	public final org.jooq.TableField<io.corps.sgoc.schema.tables.tables.records.IndexEntriesRecord, java.lang.String> UUID = createField("uuid", org.jooq.impl.SQLDataType.VARCHAR.length(32).nullable(false), this);
+	public final org.jooq.TableField<io.corps.sgoc.schema.tables.tables.records.IndexEntriesRecord, java.lang.String> UUID = createField("uuid", org.jooq.impl.SQLDataType.VARCHAR.length(72).nullable(false), this);
 
 	/**
 	 * The column <code>sgoc_test.index_entries.index_key</code>. binary of the proto

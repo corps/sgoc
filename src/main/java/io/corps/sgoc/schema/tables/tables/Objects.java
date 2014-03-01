@@ -11,7 +11,7 @@ package io.corps.sgoc.schema.tables.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Objects extends org.jooq.impl.TableImpl<io.corps.sgoc.schema.tables.tables.records.ObjectsRecord> {
 
-	private static final long serialVersionUID = 510231736;
+	private static final long serialVersionUID = -165385734;
 
 	/**
 	 * The singleton instance of <code>sgoc_test.objects</code>
@@ -29,17 +29,22 @@ public class Objects extends org.jooq.impl.TableImpl<io.corps.sgoc.schema.tables
 	/**
 	 * The column <code>sgoc_test.objects.root_key</code>.
 	 */
-	public final org.jooq.TableField<io.corps.sgoc.schema.tables.tables.records.ObjectsRecord, java.lang.String> ROOT_KEY = createField("root_key", org.jooq.impl.SQLDataType.VARCHAR.length(32).nullable(false), this);
+	public final org.jooq.TableField<io.corps.sgoc.schema.tables.tables.records.ObjectsRecord, java.lang.String> ROOT_KEY = createField("root_key", org.jooq.impl.SQLDataType.VARCHAR.length(72).nullable(false), this);
 
 	/**
 	 * The column <code>sgoc_test.objects.uuid</code>.
 	 */
-	public final org.jooq.TableField<io.corps.sgoc.schema.tables.tables.records.ObjectsRecord, java.lang.String> UUID = createField("uuid", org.jooq.impl.SQLDataType.VARCHAR.length(32).nullable(false), this);
+	public final org.jooq.TableField<io.corps.sgoc.schema.tables.tables.records.ObjectsRecord, java.lang.String> UUID = createField("uuid", org.jooq.impl.SQLDataType.VARCHAR.length(72).nullable(false), this);
 
 	/**
 	 * The column <code>sgoc_test.objects.object</code>.
 	 */
 	public final org.jooq.TableField<io.corps.sgoc.schema.tables.tables.records.ObjectsRecord, byte[]> OBJECT = createField("object", org.jooq.impl.SQLDataType.BLOB.nullable(false), this);
+
+	/**
+	 * The column <code>sgoc_test.objects.deleted</code>. Only used for filtering on initial import.
+	 */
+	public final org.jooq.TableField<io.corps.sgoc.schema.tables.tables.records.ObjectsRecord, java.lang.Byte> DELETED = createField("deleted", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this);
 
 	/**
 	 * The column <code>sgoc_test.objects.timestamp</code>.

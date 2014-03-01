@@ -71,8 +71,7 @@ public class Fixtures {
   }
 
   public static Sync.ObjectWrapper.Builder generateAWrapper() {
-    return Sync.ObjectWrapper.newBuilder()
-        .setId(Sync.ObjectId.newBuilder().setUuid(generateUUID()));
+    return Sync.ObjectWrapper.newBuilder().setId(generateUUID());
   }
 
   public static Test.Apple.Builder generateAnApple() {
@@ -101,6 +100,10 @@ public class Fixtures {
 
   public static Sync.ObjectWrapper wrapASpaghetti() {
     return wrapASpaghetti(generateAWrapper().build(), generateASpaghetti().build());
+  }
+
+  public static Sync.ObjectWrapper wrapASpaghetti(Test.Spaghetti spaghetti) {
+    return wrapASpaghetti(generateAWrapper().build(), spaghetti);
   }
 
   public static Sync.ObjectWrapper wrapASpaghetti(Sync.ObjectWrapper wrapper, Test.Spaghetti spaghetti) {
