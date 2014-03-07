@@ -7,23 +7,19 @@ import com.google.protobuf.TextFormat;
 import io.corps.sgoc.sync.Sync;
 import io.corps.sgoc.utils.MultimapUtils;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by corps@github.com on 2014/02/21.
  * Copyrighted by Zach Collins 2014
  */
 public class EntitySchema {
-  private final Map<Descriptors.FieldDescriptor, PayloadEntity> payloadEntities;
-  private final SetMultimap<PayloadEntity, EntityIndex> referencingIndexes;
-  private final Descriptors.FileDescriptor fileDescriptor;
+  private final Map<Descriptors.FieldDescriptor, PayloadEntity> payloadEntities = new HashMap<>();
+  private final SetMultimap<PayloadEntity, EntityIndex> referencingIndexes = MultimapUtils.createMultimap();
+  private final List<Descriptors.FieldDescriptor> fieldDescriptors = new ArrayList<>();
 
   public EntitySchema(Descriptors.FileDescriptor fileDescriptor) {
-    this.fileDescriptor = fileDescriptor;
-    referencingIndexes = MultimapUtils.createMultimap();
-    payloadEntities = new HashMap<>();
+    fieldDescriptors.addAll(fileDescriptor.getExtensions());
 
     analyzeSchema();
   }
@@ -52,7 +48,7 @@ public class EntitySchema {
   }
 
   private void analyzeSchema() {
-    for (Descriptors.FieldDescriptor fieldDescriptor : fileDescriptor.getExtensions()) {
+    for (Descriptors.FieldDescriptor fieldDescriptor : fieldDescriptors) {
       if (fieldDescriptor.getContainingType().equals(Sync.ObjectWrapper.getDescriptor())) {
         payloadEntities.put(fieldDescriptor, new PayloadEntity(fieldDescriptor));
       }

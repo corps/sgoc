@@ -2,14 +2,9 @@ package corps.sgoc;
 
 option java_package = "io.corps.sgoc.sync";
 
-message ObjectId {
-    // The unique id for this object -- only truely unique per root_id.
-    optional string uuid = 1;
-}
-
 message ObjectWrapper {
     // Unique per user graph.
-    optional ObjectId id = 1;
+    optional string id = 1;
 
     // When true, the payload is omitted.
     optional bool deleted = 2;

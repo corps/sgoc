@@ -72,8 +72,9 @@ message Orange {
 
 message Spaghetti {
     message Noodle {
-        optional string type = 1 [(corps.sgoc.required) = true, (corps.sgoc.max_length) = 8];
+        repeated string type = 1 [(corps.sgoc.required) = true, (corps.sgoc.max_length) = 8, (corps.sgoc.max_repeated) = 2];
     }
-    repeated Noodle noodle = 1 [(corps.sgoc.max_length) = 2];
+    repeated Noodle noodle = 1 [(corps.sgoc.max_repeated) = 3];
     repeated string descriptive_words = 2 [(corps.sgoc.required) = true];
+    optional string plate_name = 3 [(corps.sgoc.required) = true, (corps.sgoc.max_length) = 4];
 }
