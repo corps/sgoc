@@ -9,7 +9,18 @@ buildscript {
 
 apply plugin: 'protobuf'
 apply plugin: 'java'
+apply plugin: 'idea'
 
+idea {
+    module {
+        excludeDirs = [file(".gradle")]
+        ["classes", "docs", "dependency-cache", "libs", "reports", "resources", "test-results", "tmp"].each {
+            excludeDirs << file("$buildDir/$it")
+        }
+    }
+}
+
+protocPath = '/usr/local/bin/protoc'
 sourceCompatibility = 1.7
 version = '1.0'
 
