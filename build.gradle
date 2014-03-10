@@ -41,7 +41,6 @@ dependencies {
     compile group: "org.jooq", name: "jooq-meta", version: "3.2.3"
     compile group: "org.jooq", name: "jooq-codegen", version: "3.2.3"
     compile group: "com.google.guava", name: "guava", version: "16.0.1"
-//    compile group: "log4j", name: "log4j", version: "1.2.16"
     testProtobuf files("build/distributions/sgoc-${version}.tar")
 }
 
@@ -56,6 +55,11 @@ Task cleanupTestProtosTask = task(cleanupTestProtos, type: Delete) {
             "${project.buildDir}/generated-sources/test/com"
 }
 
+task generateJooq(type: JavaExec) {
+    main = "org.jooq.util.GenerationTool"
+    classpath = sourceSets.main.runtimeClasspath
+    args = ["/schema.xml"]
+}
 
 Task generateTestProtoTask = project.tasks.getByName("generateTestProto")
 Task extractTestProtoTask = project.tasks.getByName("extractTestProto")

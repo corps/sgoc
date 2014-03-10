@@ -34,10 +34,10 @@
 
         <target>
             <!-- The destination package of your generated classes (within the destination directory) -->
-            <packageName>io.corps.sgoc.schema.tables</packageName>
+            <packageName>io.corps.sgoc.schema</packageName>
 
             <!-- The destination directory of your generated classes -->
-            <directory>/Users/dame/Development/sgoc/src/main/java</directory>
+            <directory>src/main/java</directory>
         </target>
     </generator>
 </configuration>

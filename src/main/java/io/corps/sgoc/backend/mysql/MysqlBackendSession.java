@@ -7,17 +7,17 @@ import com.google.common.primitives.SignedBytes;
 import com.google.protobuf.ExtensionRegistry;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
 import io.corps.sgoc.backend.BackendSession;
-import io.corps.sgoc.schema.IndexLookup;
+import io.corps.sgoc.schema.*;
 import io.corps.sgoc.schema.Schema;
-import io.corps.sgoc.schema.tables.Tables;
-import io.corps.sgoc.schema.tables.tables.records.IndexEntriesRecord;
-import io.corps.sgoc.schema.tables.tables.records.LogEntriesRecord;
-import io.corps.sgoc.schema.tables.tables.records.ObjectsRecord;
+import io.corps.sgoc.schema.tables.records.IndexEntriesRecord;
+import io.corps.sgoc.schema.tables.records.LogEntriesRecord;
+import io.corps.sgoc.schema.tables.records.ObjectsRecord;
 import io.corps.sgoc.session.LogStateManager;
 import io.corps.sgoc.session.Session;
 import io.corps.sgoc.session.exceptions.WriteContentionException;
 import io.corps.sgoc.sync.Sync;
 import io.corps.sgoc.utils.MultimapUtils;
+import io.corps.sgoc.schema.Tables;
 import org.jooq.*;
 import org.jooq.conf.Settings;
 import org.jooq.exception.DataAccessException;
@@ -28,10 +28,7 @@ import org.jooq.impl.DefaultConnectionProvider;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by corps@github.com on 2014/02/17.
@@ -94,7 +91,7 @@ public class MysqlBackendSession implements BackendSession {
     if (idsToLookup.isEmpty()) return result;
 
     for (List<String> objectIds : Iterables.partition(idsToLookup, lookupPartitionSize)) {
-      SelectQuery<ObjectsRecord> query = dslContext.selectQuery(Tables.OBJECTS);
+      SelectQuery<ObjectsRecord> query = dslContext.selectQuery(io.corps.sgoc.schema.Tables.OBJECTS);
 
       query.addConditions(Tables.OBJECTS.ROOT_KEY.equal(rootKey));
       if (objectIds.size() == 1) {

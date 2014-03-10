@@ -24,4 +24,3 @@ CREATE TABLE `index_entries` (
   FOREIGN KEY `fk_referenced_object` (root_key, uuid) REFERENCES `objects` (root_key, uuid),
   PRIMARY KEY (root_key, index_key, index_value, uuid)
 );
-# CREATE INDEX `index_entries_index` ON `index_entries` (`root_key`, `index_key`, `index_value`);
