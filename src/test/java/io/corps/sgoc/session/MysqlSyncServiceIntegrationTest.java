@@ -19,7 +19,7 @@ public class MysqlSyncServiceIntegrationTest extends AbstractSyncServiceIntegrat
   protected SessionFactory getSessionFactory(SessionConfig config) throws Exception {
     cpds = new ComboPooledDataSource();
     cpds.setDriverClass("com.mysql.jdbc.Driver");
-    cpds.setJdbcUrl("jdbc:mysql://127.0.0.1:3306/");
+    cpds.setJdbcUrl("jdbc:mysql://127.0.0.1:3306/sgoc_test");
     cpds.setUser("root");
     cpds.setAutoCommitOnClose(false);
     cpds.setMaxPoolSize(4);

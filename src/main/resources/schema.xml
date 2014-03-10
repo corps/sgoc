@@ -21,6 +21,9 @@
                  can be the owner, user, database name) to be generated -->
             <inputSchema>sgoc_test</inputSchema>
 
+            <!-- Don't map to any specific schema -->
+            <outputSchema></outputSchema>
+
             <!-- All elements that are generated from your schema
                  (A Java regular expression. Use the pipe to separate several expressions)
                  Watch out for case-sensitivity. Depending on your database, this might be important! -->
@@ -34,7 +37,7 @@
 
         <target>
             <!-- The destination package of your generated classes (within the destination directory) -->
-            <packageName>io.corps.sgoc.schema</packageName>
+            <packageName>io.corps.sgoc.jooq</packageName>
 
             <!-- The destination directory of your generated classes -->
             <directory>src/main/java</directory>
