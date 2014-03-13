@@ -36,7 +36,7 @@ public class MaxLengthTriggerTest {
             .addNoodle(Test.Spaghetti.Noodle.newBuilder().addType("123456789"))
             .build());
 
-    Assert.assertEquals(sketti.toBuilder().setDeleted(true).build(), trigger.beforePut(null, schema, sketti, null,
+    Assert.assertNull(trigger.beforePut(null, schema, sketti, null,
         Collections.<String>emptySet()));
 
     sketti = Fixtures
@@ -45,7 +45,7 @@ public class MaxLengthTriggerTest {
 
     sketti = Fixtures
         .wrapASpaghetti(Test.Spaghetti.newBuilder().setPlateName("WOOAAAAHHH").build());
-    Assert.assertEquals(sketti.toBuilder().setDeleted(true).build(), trigger.beforePut(null, schema, sketti, null,
+    Assert.assertNull(trigger.beforePut(null, schema, sketti, null,
         Collections.<String>emptySet()));
   }
 }

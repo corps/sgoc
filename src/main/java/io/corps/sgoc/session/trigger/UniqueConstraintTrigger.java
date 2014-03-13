@@ -31,10 +31,10 @@ public class UniqueConstraintTrigger extends BeforePutTrigger {
         Set<String> objectIds = session.indexLookup(entityIndex.lookup(beingPut));
         for (String objectId : objectIds) {
           if (!objectId.equals(beingPut.getId())) {
-            if(upcomingIds.contains(objectId)) {
+            if (upcomingIds.contains(objectId)) {
               throw new DependentPutReorderingRequest(objectId);
             }
-            return beingPut.toBuilder().setDeleted(true).build();
+            return existing;
           }
         }
       }

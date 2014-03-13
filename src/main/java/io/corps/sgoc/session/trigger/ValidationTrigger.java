@@ -3,10 +3,10 @@ package io.corps.sgoc.session.trigger;
 import com.google.protobuf.DescriptorProtos;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.GeneratedMessage;
-import io.corps.sgoc.session.ReadSession;
 import io.corps.sgoc.schema.EntitySchema;
 import io.corps.sgoc.schema.FieldPathChain;
 import io.corps.sgoc.schema.PayloadEntity;
+import io.corps.sgoc.session.ReadSession;
 import io.corps.sgoc.sync.Sync;
 
 import java.io.IOException;
@@ -42,7 +42,7 @@ public abstract class ValidationTrigger<ExtensionType> extends BeforePutTrigger 
       for (FieldPathChain<Sync.ObjectWrapper>.Pair pair : pathChain.iterate(proposed, expandLists)) {
         if (validTypes == null || validTypes.contains(pair.fieldDescriptor.getType())) {
           if (!isValid(pair.fieldDescriptor.getOptions().getExtension(option), pair.fieldDescriptor, pair.object)) {
-            return proposed.toBuilder().setDeleted(true).build();
+            return existing;
           }
         }
       }

@@ -38,7 +38,7 @@ public class RequiredValidationTriggerTest {
             .addNoodle(Test.Spaghetti.Noodle.newBuilder().addType("Hoo").addType(""))
             .build());
 
-    Assert.assertEquals(spaghetti.toBuilder().setDeleted(true).build(), afterValidation(spaghetti));
+    Assert.assertNull(afterValidation(spaghetti));
 
     spaghetti = Fixtures.wrapASpaghetti(Fixtures.generateAWrapper().build(),
         Test.Spaghetti.newBuilder().addDescriptiveWords("Hot pot spot").addDescriptiveWords("Yum yum")
@@ -47,12 +47,12 @@ public class RequiredValidationTriggerTest {
 
     spaghetti = Fixtures.wrapASpaghetti(Fixtures.generateAWrapper().build(),
         spaghetti.getExtension(Test.spaghetti).toBuilder().addDescriptiveWords("").setPlateName("hoho").build());
-    Assert.assertEquals(spaghetti.toBuilder().setDeleted(true).build(), afterValidation(spaghetti));
+    Assert.assertNull(afterValidation(spaghetti));
 
     spaghetti = Fixtures.wrapASpaghetti(Fixtures.generateAWrapper().build(),
         Test.Spaghetti.newBuilder().addDescriptiveWords("Hot pot spot").addDescriptiveWords("Yum yum")
             .setPlateName("").build());
-    Assert.assertEquals(spaghetti.toBuilder().setDeleted(true).build(), afterValidation(spaghetti));
+    Assert.assertNull(afterValidation(spaghetti));
   }
 
   private Sync.ObjectWrapper afterValidation(Sync.ObjectWrapper spaghetti) throws IOException {

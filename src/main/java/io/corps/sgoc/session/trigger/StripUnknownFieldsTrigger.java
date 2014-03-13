@@ -3,11 +3,12 @@ package io.corps.sgoc.session.trigger;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
 import com.google.protobuf.UnknownFieldSet;
-import io.corps.sgoc.session.ReadSession;
 import io.corps.sgoc.schema.EntitySchema;
+import io.corps.sgoc.session.ReadSession;
 import io.corps.sgoc.sync.Sync;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -37,15 +38,14 @@ public class StripUnknownFieldsTrigger extends BeforePutTrigger {
       Descriptors.FieldDescriptor fieldDescriptor = entry.getKey();
 
       if (fieldDescriptor.getJavaType() == Descriptors.FieldDescriptor.JavaType.MESSAGE) {
-        Message value = (Message) entry.getValue();
-
-        Message stripped = stripUnknownFields(value);
-        if (value != stripped) {
-          if (builder == null) {
-            builder = message.toBuilder();
+        if (fieldDescriptor.isRepeated()) {
+          for (Object elem : (List) entry.getValue()) {
+            Message value = (Message) elem;
+            builder = strip(message, builder, fieldDescriptor, value);
           }
-
-          builder.setField(fieldDescriptor, stripped);
+        } else {
+          Message value = (Message) entry.getValue();
+          builder = strip(message, builder, fieldDescriptor, value);
         }
       }
     }
@@ -55,5 +55,18 @@ public class StripUnknownFieldsTrigger extends BeforePutTrigger {
     }
 
     return message;
+  }
+
+  private <T extends Message> Message.Builder strip(T message, Message.Builder builder,
+                                                    Descriptors.FieldDescriptor fieldDescriptor, Message value) {
+    Message stripped = stripUnknownFields(value);
+    if (value != stripped) {
+      if (builder == null) {
+        builder = message.toBuilder();
+      }
+
+      builder.setField(fieldDescriptor, stripped);
+    }
+    return builder;
   }
 }

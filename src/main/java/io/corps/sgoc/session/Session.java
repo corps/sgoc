@@ -257,8 +257,14 @@ public class Session implements ReadWriteSession {
                                                       Sync.ObjectWrapper existingObject,
                                                       Set<String> objectIds) throws IOException {
     for (BeforePutTrigger trigger : beforePutTriggers) {
-      objectWrapper = Preconditions.checkNotNull(trigger.beforePut(this, entitySchema, objectWrapper, existingObject,
-          objectIds));
+      Sync.ObjectWrapper triggerProposed =
+          trigger.beforePut(this, entitySchema, objectWrapper, existingObject, objectIds);
+
+      if (triggerProposed == null) {
+        triggerProposed = objectWrapper.toBuilder().setDeleted(true).build();
+      }
+
+      objectWrapper = Preconditions.checkNotNull(triggerProposed);
     }
 
     return objectWrapper;

@@ -39,8 +39,7 @@ public class MaxRepeatedTriggerTest {
             .addNoodle(Test.Spaghetti.Noodle.getDefaultInstance())
             .build());
 
-    Assert.assertEquals(sketti.toBuilder().setDeleted(true).build(), trigger.beforePut(null, schema, sketti, null,
-        Collections.<String>emptySet()));
+    Assert.assertNull(trigger.beforePut(null, schema, sketti, null, Collections.<String>emptySet()));
     sketti = Fixtures
         .wrapASpaghetti(Test.Spaghetti.newBuilder()
             .addNoodle(Test.Spaghetti.Noodle.newBuilder()
@@ -60,7 +59,7 @@ public class MaxRepeatedTriggerTest {
                 .addType("")
                 .addType(""))
             .build());
-    Assert.assertEquals(sketti.toBuilder().setDeleted(true).build(), trigger.beforePut(null, schema, sketti, null,
-        Collections.<String>emptySet()));
+    Sync.ObjectWrapper existing = Fixtures.wrapASpaghetti();
+    Assert.assertEquals(existing, trigger.beforePut(null, schema, sketti, existing, Collections.<String>emptySet()));
   }
 }

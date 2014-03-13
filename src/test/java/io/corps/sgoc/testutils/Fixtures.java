@@ -95,7 +95,8 @@ public class Fixtures {
   }
 
   public static Test.Spaghetti.Builder generateASpaghetti() {
-    return Test.Spaghetti.newBuilder();
+    return Test.Spaghetti.newBuilder().setPlateName("abc").addDescriptiveWords("fffffff").addNoodle(
+        Test.Spaghetti.Noodle.newBuilder().addType("homp"));
   }
 
   public static Sync.ObjectWrapper wrapASpaghetti() {

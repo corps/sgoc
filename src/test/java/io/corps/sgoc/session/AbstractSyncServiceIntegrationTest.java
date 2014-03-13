@@ -138,6 +138,11 @@ public abstract class AbstractSyncServiceIntegrationTest {
       changes.add(basket1);
       expected.add(bumpVersion(basket1, 1));
 
+      // Tests an object with various required fields
+      Sync.ObjectWrapper spaghetti = Fixtures.wrapASpaghetti();
+      changes.add(spaghetti);
+      expected.add(bumpVersion(spaghetti, 1));
+
       // Tests an object with an embedded message and index.
       Sync.ObjectWrapper orange = Fixtures
           .wrapAnOrange(Fixtures.generateAnOrange().setSkin(Skin.newBuilder().setTexture("Bumpy")).build());
@@ -162,6 +167,19 @@ public abstract class AbstractSyncServiceIntegrationTest {
           .setExtension(Test.pie, pie2.getExtension(Test.pie).toBuilder().clearFruitId().build()).build();
       expected.add(pie2);
 
+
+      getResponse = testSync(rootKey, thisVersion, expected, changes);
+      lastVersion = thisVersion;
+      thisVersion = getResponse.getCurrentVersion();
+      expected.clear();
+      changes.clear();
+
+      // Removing a required field from the spaghetti -- validation reverts to previous version
+      spaghetti = bumpVersion(spaghetti, 1);
+      changes.add(spaghetti.toBuilder()
+          .setExtension(Test.spaghetti, spaghetti.getExtension(Test.spaghetti).toBuilder().clearPlateName().build())
+          .build());
+      expected.add(bumpVersion(spaghetti, 2));
 
       getResponse = testSync(rootKey, thisVersion, expected, changes);
       lastVersion = thisVersion;
@@ -266,6 +284,7 @@ public abstract class AbstractSyncServiceIntegrationTest {
 
       testSync(rootKey, lastVersion, expected, changes);
 
+      expected.add(bumpVersion(spaghetti, 2));
       expected.add(bumpVersion(basket, 1));
       expected.add(bumpVersion(basket1, 1));
       expected.add(bumpVersion(pie1, 1));
