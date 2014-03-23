@@ -50,8 +50,9 @@ public class SessionConfig {
       afterPutTriggers.add(new OnDeletePropagationTrigger());
     }
 
-    if (builder.ensureDeleteIdempotence) {
+    if (builder.idempotence) {
       beforePutTriggers.add(new IdempotentDeleteTrigger());
+      beforePutTriggers.add(new IdempotentTypeTrigger());
     }
 
     if (builder.enableDefaultValidations) {
@@ -105,7 +106,7 @@ public class SessionConfig {
     private final List<AfterPutTrigger> customAfterTriggers = Lists.newArrayList();
     private final List<TransactionTrigger> customTransactionTriggers = Lists.newArrayList();
     private int numRetries = 5;
-    private boolean ensureDeleteIdempotence = true;
+    private boolean idempotence = true;
     private boolean cascadeDeletes = true;
     private boolean enableDefaultValidations = true;
     private boolean stripUnknownFields = true;
@@ -148,8 +149,8 @@ public class SessionConfig {
       return this;
     }
 
-    public Builder setEnsureDeleteIdempotence(boolean ensureDeleteIdempotence) {
-      this.ensureDeleteIdempotence = ensureDeleteIdempotence;
+    public Builder setEnsureDeletionAndTypeIdempotence(boolean ensureIdempotence) {
+      this.idempotence = ensureIdempotence;
       return this;
     }
 

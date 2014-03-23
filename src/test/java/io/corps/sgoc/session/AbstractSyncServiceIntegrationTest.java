@@ -275,12 +275,18 @@ public abstract class AbstractSyncServiceIntegrationTest {
       changes.add(apple1.toBuilder().setDeleted(false).build());
       expected.add(deleted(bumpVersion(apple1, 2)));
 
+      // idempotent type
+      orange = bumpVersion(orange, 2);
+      Sync.ObjectWrapper badApple = Fixtures.wrapAnApple(orange.toBuilder().clearExtension(Test.orange).build());
+      changes.add(badApple);
+      expected.add(bumpVersion(orange, 3));
+      // No expected changes.
+
       testSync(rootKey, thisVersion, expected, changes);
       changes.clear();
 
       expected.add(bumpVersion(apple3, 1));
       expected.add(bumpVersion(deleted(apple4), 1));
-      expected.add(bumpVersion(orange, 2));
       expected.add(bumpVersion(pie, 1));
 
       testSync(rootKey, lastVersion, expected, changes);
