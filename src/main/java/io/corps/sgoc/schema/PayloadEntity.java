@@ -131,7 +131,6 @@ public class PayloadEntity {
   private void addIndex(Schema.IndexDescriptor indexDescriptor, Schema.ReferenceDescriptor referenceDescriptor) {
     EntityIndex index = new EntityIndex(indexDescriptor, referenceDescriptor);
 
-    // Ideally would use conditionals and not generate the string everytime, but it's a minor setup time cost.
     String debugString = TextFormat.shortDebugString(indexDescriptor);
     Preconditions.checkArgument(!indexes.containsKey(indexDescriptor), "Identical indexes found: " + debugString);
 
@@ -182,7 +181,8 @@ public class PayloadEntity {
   private Schema.IndexDescriptor buildADefaultIndexDescriptor(Descriptors.FieldDescriptor fieldDescriptor,
                                                               Schema.ReferenceDescriptor referenceDescriptor) {
     FieldPath<Sync.ObjectWrapper> fieldPath = new FieldPath<>(
-        Lists.<Descriptors.FieldDescriptor>newArrayList(wrapperFieldDescriptor, fieldDescriptor));
+        Lists.<Descriptors.FieldDescriptor>newArrayList(wrapperFieldDescriptor, fieldDescriptor,
+            Sync.ReferenceId.getDescriptor().findFieldByNumber(Sync.ReferenceId.ID_FIELD_NUMBER)));
 
     Schema.IndexDescriptor.Builder indexDescriptor = Schema.IndexDescriptor.newBuilder();
     Sync.ObjectWrapper.Builder keyObject = Sync.ObjectWrapper.newBuilder();

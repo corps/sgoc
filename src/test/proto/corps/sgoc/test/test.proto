@@ -18,7 +18,7 @@ message Basket {
 
 message Apple {
     optional int64 ordinal = 1;
-    optional string basket_id = 2 [(corps.sgoc.reference) = {
+    optional ReferenceId basket_id = 2 [(corps.sgoc.reference) = {
         type: {[corps.sgoc.test.basket]: {}},
         index_name: "Basket Index",
         on_delete:CASCADE
@@ -28,7 +28,7 @@ message Apple {
         index: {
             unique: true,
             key_field: {[corps.sgoc.test.apple]: {ordinal: 0}},
-            key_field: {[corps.sgoc.test.apple]: {basket_id: ""}}
+            key_field: {[corps.sgoc.test.apple]: {basket_id: {id: ""}}}
         },
         index: {
             key_field: {[corps.sgoc.test.apple]: {ordinal: 0}},
@@ -38,7 +38,7 @@ message Apple {
 }
 
 message Pie {
-    optional string fruit_id = 1 [(corps.sgoc.reference) = {
+    optional ReferenceId fruit_id = 1 [(corps.sgoc.reference) = {
         type: {[corps.sgoc.test.apple]: {}},
         type: {[corps.sgoc.test.orange]: {}},
         on_delete: SET_NULL,
@@ -59,7 +59,7 @@ message Orange {
     }
 
     optional Skin skin = 1;
-    optional string basket_id = 3 [(corps.sgoc.reference) = {
+    optional ReferenceId basket_id = 3 [(corps.sgoc.reference) = {
         type: {[corps.sgoc.test.basket]: {}}
     }];
 

@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import static io.corps.sgoc.testutils.ReferenceIds.idOf;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 
@@ -246,7 +247,7 @@ public class SessionTest {
   public void testPutObjectOverExistingIndexSaves() throws Exception {
     // The existing object is already deleted.
     Sync.ObjectWrapper existingObject = Fixtures.wrapAnApple(objectWrapper,
-        Fixtures.generateAnApple().setBasketId("Hi hi hi").setOrdinal(5).build());
+        Fixtures.generateAnApple().setBasketId(idOf("Hi hi hi")).setOrdinal(5).build());
     when(backendSession.lookup(rootKey, Lists.newArrayList(id)))
         .thenReturn(Lists.<Sync.ObjectWrapper>newArrayList(existingObject));
     SetMultimap<IndexLookup, String> existingIndexes = MultimapUtils.createMultimap();
@@ -273,7 +274,7 @@ public class SessionTest {
   public void testPutObjectOverExistingWithRedundentIndexSaves() throws Exception {
     // The existing object is already deleted.
     Sync.ObjectWrapper existingObject = Fixtures.wrapAnApple(objectWrapper,
-        objectWrapper.getExtension(io.corps.sgoc.test.model.Test.apple).toBuilder().setBasketId("Hi hi hi").build());
+        objectWrapper.getExtension(io.corps.sgoc.test.model.Test.apple).toBuilder().setBasketId(idOf("Hi hi hi")).build());
     when(backendSession.lookup(rootKey, Lists.newArrayList(id)))
         .thenReturn(Lists.<Sync.ObjectWrapper>newArrayList(existingObject));
     SetMultimap<IndexLookup, String> existingIndexes = MultimapUtils.createMultimap();

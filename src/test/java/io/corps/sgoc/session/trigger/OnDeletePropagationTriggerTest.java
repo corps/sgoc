@@ -13,6 +13,7 @@ import io.corps.sgoc.testutils.EqualWithoutRegardToOrder;
 import io.corps.sgoc.testutils.Fixtures;
 import org.junit.Before;
 
+import static io.corps.sgoc.testutils.ReferenceIds.idOf;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.*;
 
@@ -54,8 +55,8 @@ public class OnDeletePropagationTriggerTest {
       }
     });
 
-    Sync.ObjectWrapper apple = Fixtures.wrapAnApple(appleBuilder.setBasketId("BasketId").build());
-    Sync.ObjectWrapper orange = Fixtures.wrapAnOrange(orangeBuilder.setBasketId("BasketId").build());
+    Sync.ObjectWrapper apple = Fixtures.wrapAnApple(appleBuilder.setBasketId(idOf("BasketId")).build());
+    Sync.ObjectWrapper orange = Fixtures.wrapAnOrange(orangeBuilder.setBasketId(idOf("BasketId")).build());
     String appleId = apple.getId();
     String orangeId = orange.getId();
 

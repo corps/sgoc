@@ -25,6 +25,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static io.corps.sgoc.test.model.Test.Orange.Skin;
+import static io.corps.sgoc.testutils.ReferenceIds.idOf;
 
 /**
  * Created by corps@github.com on 2014/02/22.
@@ -74,11 +75,11 @@ public abstract class AbstractSyncServiceIntegrationTest {
       Sync.ObjectWrapper basket = Fixtures.wrapABasket();
       payload1.add(basket);
       Sync.ObjectWrapper apple = Fixtures.wrapAnApple(
-          Test.Apple.newBuilder().setOrdinal(random.nextInt(100)).setBasketId(basket.getId()).build());
+          Test.Apple.newBuilder().setOrdinal(random.nextInt(100)).setBasketId(idOf(basket.getId())).build());
       payload1.add(apple);
       payload1.add(Fixtures.wrapAnOrange(
           Test.Orange.newBuilder().setSkin(Skin.newBuilder().setTexture(Fixtures.generateUUID())).build()));
-      Sync.ObjectWrapper pie = Fixtures.wrapAPie(Test.Pie.newBuilder().setFruitId(apple.getId()).build());
+      Sync.ObjectWrapper pie = Fixtures.wrapAPie(Test.Pie.newBuilder().setFruitId(idOf(apple.getId())).build());
       payload1.add(pie);
     }
 
@@ -151,7 +152,7 @@ public abstract class AbstractSyncServiceIntegrationTest {
 
       // Tests an object successfully referencing an object earlier in the same transaction.
       Sync.ObjectWrapper pie =
-          Fixtures.wrapAPie(Fixtures.generateAPie().setFruitId(orange.getId()).build());
+          Fixtures.wrapAPie(Fixtures.generateAPie().setFruitId(idOf(orange.getId())).build());
       changes.add(pie);
       expected.add(bumpVersion(pie, 1));
 
@@ -161,7 +162,7 @@ public abstract class AbstractSyncServiceIntegrationTest {
       expected.add(bumpVersion(pie1, 1));
 
       // tests an object with a reference set to a non existent bad value.
-      Sync.ObjectWrapper pie2 = Fixtures.wrapAPie(Fixtures.generateAPie().setFruitId("Not an id").build());
+      Sync.ObjectWrapper pie2 = Fixtures.wrapAPie(Fixtures.generateAPie().setFruitId(idOf("Not an id")).build());
       changes.add(pie2);
       pie2 = bumpVersion(pie2, 1).toBuilder()
           .setExtension(Test.pie, pie2.getExtension(Test.pie).toBuilder().clearFruitId().build()).build();
@@ -189,17 +190,17 @@ public abstract class AbstractSyncServiceIntegrationTest {
 
       // Test changing to an invalid / deleted reference with an older version
       changes.add(pie.toBuilder().setExtension(Test.pie,
-          pie.toBuilder().getExtension(Test.pie).toBuilder().setFruitId("Some bad id").build()).build());
+          pie.toBuilder().getExtension(Test.pie).toBuilder().setFruitId(idOf("Some bad id")).build()).build());
       pie = bumpVersion(pie, 1); // actual version after last put.
       expected.add(pie);
 
       // Test adding two apples to the same ordinal of the same basket, and one against a different basket.
       Sync.ObjectWrapper apple =
-          Fixtures.wrapAnApple(Test.Apple.newBuilder().setOrdinal(23).setBasketId(basket.getId()).build());
+          Fixtures.wrapAnApple(Test.Apple.newBuilder().setOrdinal(23).setBasketId(idOf(basket.getId())).build());
       changes.add(apple);
       expected.add(bumpVersion(apple, 1));
       Sync.ObjectWrapper apple1 =
-          Fixtures.wrapAnApple(Test.Apple.newBuilder().setOrdinal(23).setBasketId(basket.getId()).build());
+          Fixtures.wrapAnApple(Test.Apple.newBuilder().setOrdinal(23).setBasketId(idOf(basket.getId())).build());
       changes.add(apple1);
       expected.add(bumpVersion(deleted(apple1), 1));
 
@@ -251,7 +252,7 @@ public abstract class AbstractSyncServiceIntegrationTest {
 
       // References valid object, but the object gets deleted after the fact.
       Sync.ObjectWrapper orange1 =
-          Fixtures.wrapAnOrange(Test.Orange.newBuilder().setBasketId(basket2.getId()).build());
+          Fixtures.wrapAnOrange(Test.Orange.newBuilder().setBasketId(idOf(basket2.getId())).build());
       changes.add(orange1);
 
       basket2 = bumpVersion(deleted(basket2), 1);
@@ -263,7 +264,7 @@ public abstract class AbstractSyncServiceIntegrationTest {
       // Reference before it actually gets put.
       Sync.ObjectWrapper basket3 = Fixtures.wrapABasket();
       Sync.ObjectWrapper orange2 =
-          Fixtures.wrapAnOrange(Test.Orange.newBuilder().setBasketId(basket3.getId()).build());
+          Fixtures.wrapAnOrange(Test.Orange.newBuilder().setBasketId(idOf(basket3.getId())).build());
       changes.add(orange2);
       changes.add(basket3);
       expected.add(bumpVersion(orange2, 1));

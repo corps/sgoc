@@ -11,6 +11,7 @@ import org.junit.Before;
 import java.util.Collections;
 
 import static io.corps.sgoc.testutils.Fixtures.wrapAnApple;
+import static io.corps.sgoc.testutils.ReferenceIds.idOf;
 import static org.mockito.Mockito.*;
 
 /**
@@ -26,7 +27,7 @@ public class BadReferenceDeletePropagationTriggerTest {
 
   @org.junit.Test
   public void testIgnoresValidRelationships() throws Exception {
-    Sync.ObjectWrapper beingPut = wrapAnApple(appleBuilder.setBasketId("BasketId").build());
+    Sync.ObjectWrapper beingPut = wrapAnApple(appleBuilder.setBasketId(idOf("BasketId")).build());
     when(session.get("BasketId")).thenReturn(Fixtures.wrapABasket());
 
     Assert.assertEquals(beingPut, trigger.beforePut(session, schema, beingPut, null,
@@ -35,7 +36,7 @@ public class BadReferenceDeletePropagationTriggerTest {
 
   @org.junit.Test
   public void testTriggersOnDeletedReference() throws Exception {
-    Sync.ObjectWrapper beingPut = wrapAnApple(appleBuilder.setBasketId("BasketId").build());
+    Sync.ObjectWrapper beingPut = wrapAnApple(appleBuilder.setBasketId(idOf("BasketId")).build());
     when(session.get("BasketId")).thenReturn(Fixtures.wrapABasket().toBuilder().setDeleted(true).build());
 
     Assert.assertEquals(beingPut.toBuilder().setDeleted(true).build(),
@@ -44,7 +45,7 @@ public class BadReferenceDeletePropagationTriggerTest {
 
   @org.junit.Test
   public void testTriggersOnNonExistentReference() throws Exception {
-    Sync.ObjectWrapper beingPut = wrapAnApple(appleBuilder.setBasketId("BasketId").build());
+    Sync.ObjectWrapper beingPut = wrapAnApple(appleBuilder.setBasketId(idOf("BasketId")).build());
     when(session.get("BasketId")).thenReturn(null);
 
     Assert.assertEquals(beingPut.toBuilder().setDeleted(true).build(),
@@ -53,7 +54,7 @@ public class BadReferenceDeletePropagationTriggerTest {
 
   @org.junit.Test
   public void testTriggersOnInvalidType() throws Exception {
-    Sync.ObjectWrapper beingPut = wrapAnApple(appleBuilder.setBasketId("BasketId").build());
+    Sync.ObjectWrapper beingPut = wrapAnApple(appleBuilder.setBasketId(idOf("BasketId")).build());
     when(session.get("BasketId")).thenReturn(Fixtures.wrapAnOrange());
 
     Assert.assertEquals(beingPut.toBuilder().setDeleted(true).build(),
@@ -71,7 +72,7 @@ public class BadReferenceDeletePropagationTriggerTest {
 
   @org.junit.Test
   public void testTriggerHandlesSetNull() throws Exception {
-    Sync.ObjectWrapper beingPut = Fixtures.wrapAPie(pieBuilder.setFruitId("FruitId").build());
+    Sync.ObjectWrapper beingPut = Fixtures.wrapAPie(pieBuilder.setFruitId(idOf("FruitId")).build());
     when(session.get("FruitId")).thenReturn(null);
 
     Assert.assertEquals(Fixtures.wrapAPie(beingPut, pieBuilder.clearFruitId().build()),

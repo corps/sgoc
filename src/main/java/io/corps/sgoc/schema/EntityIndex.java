@@ -135,6 +135,7 @@ public class EntityIndex {
     Descriptors.FieldDescriptor last = Iterators.getLast(referencePath.iterator(), null);
     last = Preconditions.checkNotNull(last);
     Preconditions.checkArgument(last.getJavaType().equals(Descriptors.FieldDescriptor.JavaType.STRING));
+    Preconditions.checkArgument(last.getContainingType().equals(Sync.ReferenceId.getDescriptor()));
   }
 
   private Object[] getIndexValues(Sync.ObjectWrapper objectWrapper) {

@@ -25,7 +25,8 @@ public class Wrappers {
         objectWrapper.setDeleted(true);
         break;
       case SET_NULL:
-        referenceIndex.getReferenceFieldPath().clear(objectWrapper);
+        // Special case -- we want to clear, not just the actual id, but the entire reference id.
+        referenceIndex.getReferenceFieldPath().getParentPath().clear(objectWrapper);
         break;
     }
   }

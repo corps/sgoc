@@ -7,6 +7,8 @@ import org.junit.Test;
 
 import java.util.Collections;
 
+import static io.corps.sgoc.testutils.ReferenceIds.idOf;
+
 /**
  * Created by corps@github.com on 2014/02/24.
  * Copyrighted by Zach Collins 2014
@@ -22,7 +24,7 @@ public class ObjectVersioningTriggerTest {
 
     Sync.ObjectWrapper versionedOrange = orange.toBuilder().setVersion(123).build();
     Sync.ObjectWrapper coolOrange =
-        Fixtures.wrapAnOrange(versionedOrange, Fixtures.generateAnOrange().setBasketId("Hohoho").build());
+        Fixtures.wrapAnOrange(versionedOrange, Fixtures.generateAnOrange().setBasketId(idOf("Hohoho")).build());
     Assert.assertEquals(coolOrange.toBuilder().setVersion(124).build(),
         trigger.beforePut(null, null, coolOrange, versionedOrange, Collections.<String>emptySet()));
 

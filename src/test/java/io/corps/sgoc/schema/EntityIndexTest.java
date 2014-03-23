@@ -8,6 +8,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import static io.corps.sgoc.test.model.Test.*;
+import static io.corps.sgoc.testutils.ReferenceIds.idOf;
 
 /**
  * Created by corps@github.com on 2014/02/22.
@@ -20,7 +21,9 @@ public class EntityIndexTest {
     EntityIndex entityIndex =
         new EntityIndex(
             Schema.IndexDescriptor.newBuilder().addKeyField(Sync.ObjectWrapper.newBuilder()
-                .setExtension(io.corps.sgoc.test.model.Test.apple, Apple.newBuilder().setBasketId("").build()).build())
+                .setExtension(io.corps.sgoc.test.model.Test.apple,
+                    Apple.newBuilder().setBasketId(idOf("")).build())
+                .build())
                 .build(),
             Schema.ReferenceDescriptor.newBuilder()
                 .addType(builder.setExtension(apple, Apple.getDefaultInstance()))
@@ -40,7 +43,8 @@ public class EntityIndexTest {
 
     EntityIndex entityIndex = new EntityIndex(indexDescriptor, null);
     IndexLookup lookup =
-        entityIndex.lookup(Fixtures.wrapAnApple(Apple.newBuilder().setBasketId("123Basket").setOrdinal(44).build()));
+        entityIndex
+            .lookup(Fixtures.wrapAnApple(Apple.newBuilder().setBasketId(idOf("123Basket")).setOrdinal(44).build()));
 
     Assert.assertArrayEquals(new Object[]{44L, "123Basket"}, lookup.getValues());
     Assert.assertEquals(entityIndex, lookup.getIndex());

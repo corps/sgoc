@@ -26,6 +26,10 @@ public class FieldPath<T extends GeneratedMessage> implements Iterable<Descripto
     }
   }
 
+  public FieldPath<T> getParentPath() {
+    return new FieldPath<>(fieldDescriptors.subList(0, fieldDescriptors.size() - 1));
+  }
+
   public Descriptors.Descriptor getRootDescriptor() {
     if(fieldDescriptors.isEmpty()) {
       return null;
@@ -125,14 +129,14 @@ public class FieldPath<T extends GeneratedMessage> implements Iterable<Descripto
 
   private void setOrClear(Message.Builder builder, Iterator<Descriptors.FieldDescriptor> iterator, Object value) {
     Descriptors.FieldDescriptor next = iterator.next();
-    if (!next.getType().equals(Descriptors.FieldDescriptor.Type.MESSAGE)) {
+    if(!iterator.hasNext()) {
       Preconditions.checkState(!iterator.hasNext());
       if (value == null)
         builder.clearField(next);
       else
         builder.setField(next, value);
     } else {
-      Preconditions.checkState(iterator.hasNext());
+      Preconditions.checkState(next.getType().equals(Descriptors.FieldDescriptor.Type.MESSAGE));
       Message.Builder nextField = ((Message) builder.getField(next)).toBuilder();
       setOrClear(nextField, iterator, value);
       builder.setField(next, nextField.build());

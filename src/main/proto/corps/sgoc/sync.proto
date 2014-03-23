@@ -16,6 +16,12 @@ message ObjectWrapper {
     extensions 100 to max;
 }
 
+// Used by fields that reference other object wrappers.
+message ReferenceId {
+    // The referencing id.
+    optional string id = 1;
+}
+
 message PutRequest {
     // The graph root id.  Usually the user id.
     optional string root_id = 1;
