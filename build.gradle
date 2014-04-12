@@ -20,7 +20,8 @@ idea {
     }
 }
 
-protocPath = '/usr/local/bin/protoc'
+// If build is failing from not finding protoc, specify it here:
+//protocPath = '/Users/dame/bin/protoc'
 sourceCompatibility = 1.7
 version = '1.0'
 
@@ -36,7 +37,7 @@ dependencies {
     compile group: "c3p0", name: "c3p0", version: "0.9.1.2"
     compile group: "com.github.rholder", name: "guava-retrying", version: "1.0.5"
     compile group: "mysql", name: "mysql-connector-java", version: "5.1.29"
-    compile group: "com.google.protobuf", name: "protobuf-java", version: "2.4.1"
+    compile group: "com.google.protobuf", name: "protobuf-java", version: "2.5.0"
     compile group: "org.jooq", name: "jooq", version: "3.2.3"
     compile group: "org.jooq", name: "jooq-meta", version: "3.2.3"
     compile group: "org.jooq", name: "jooq-codegen", version: "3.2.3"

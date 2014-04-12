@@ -31,9 +31,9 @@
     <orderEntry type="library" exported="" name="Gradle: jooq-codegen-3.2.3" level="project" />
     <orderEntry type="library" exported="" name="Gradle: c3p0-0.9.1.2" level="project" />
     <orderEntry type="library" exported="" name="Gradle: mysql-connector-java-5.1.29" level="project" />
-    <orderEntry type="library" exported="" name="Gradle: protobuf-java-2.4.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Gradle: mockito-all-1.9.5" level="project" />
     <orderEntry type="library" exported="" name="Gradle: jooq-3.2.3" level="project" />
+    <orderEntry type="library" exported="" name="Gradle: protobuf-java-2.5.0" level="project" />
   </component>
 </module>
 
